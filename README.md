@@ -1,6 +1,6 @@
 # XNU Kernel Build System
 
-[![Build Status](https://github.com/bniladridas/xnu-kernel-build/actions/workflows/build.yml/badge.svg)](https://github.com/bniladridas/xnu-kernel-build/actions/workflows/build.yml)
+[![Build Status](https://github.com/bniladridas/xnu-build/actions/workflows/build.yml/badge.svg)](https://github.com/bniladridas/xnu-build/actions/workflows/build.yml)
 
 A comprehensive build system for compiling Apple's XNU kernel on macOS, featuring automated environment detection, source management, and compilation fixes for common issues.
 
@@ -39,8 +39,8 @@ A comprehensive build system for compiling Apple's XNU kernel on macOS, featurin
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/bniladridas/xnu-kernel-build.git
-   cd xnu-kernel-build
+   git clone https://github.com/bniladridas/xnu-build.git
+   cd xnu-build
    ```
 
 2. Run environment detection:
@@ -118,7 +118,7 @@ Built kernels are designed for virtual machine testing only. See documentation f
 ## Project Structure
 
 ```
-xnu-kernel-build/
+xnu-build/
 ├── scripts/              # Build automation scripts
 ├── build/                # Build artifacts and temporary files
 ├── output/               # Final build products
