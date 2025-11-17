@@ -1,0 +1,39 @@
+name: Build XNU Kernel
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Xcode
+      run: |
+        sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+        xcodebuild -version
+
+    - name: Run environment detection
+      run: ./scripts/detect-env.sh
+
+    - name: Fetch sources
+      run: ./scripts/fetch-sources.sh
+
+    - name: Configure build
+      run: ./scripts/configure-build.sh
+
+    - name: Build kernel
+      run: ./scripts/build-kernel.sh
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: xnu-kernel-artifacts
+        path: |
+          output/
+          build/build.log
