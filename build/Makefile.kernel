@@ -11,7 +11,7 @@ XNU_DSYM := kernel.dSYM
 MACH_DIR := $(SOURCES_DIR)/xnu/osfmk
 BSD_DIR := $(SOURCES_DIR)/xnu/bsd
 IOKIT_DIR := $(SOURCES_DIR)/xnu/iokit
-LIBKERN_DIR := $(SOURCES_DIR)/xnu/libkern
+LIBKERN_DIR := $(SOURCES_DIR)/libkern
 LIBSA_DIR := $(SOURCES_DIR)/xnu/libsa
 
 # Architecture-specific directories

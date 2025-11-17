@@ -1,6 +1,6 @@
 # XNU Kernel Build Manifest
 
-**Build Date**: Mon Nov 17 23:26:08 IST 2025
+**Build Date**: Mon Nov 17 23:43:58 IST 2025
 **Configuration**: Debug
 **Target Architecture**: arm64
 **macOS Version**: 26.1

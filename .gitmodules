@@ -1,0 +1,9 @@
+[submodule "sources/xnu"]
+	path = sources/xnu
+	url = https://github.com/apple/darwin-xnu.git
+[submodule "sources/dyld"]
+	path = sources/dyld
+	url = https://github.com/apple-oss-distributions/dyld.git
+[submodule "sources/cctools"]
+	path = sources/cctools
+	url = https://github.com/tpoechtrager/cctools-port.git
