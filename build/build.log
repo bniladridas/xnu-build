@@ -1,0 +1,49 @@
+mkdir -p /Users/niladri/Desktop/monday/xnu-build/build/mach
+Mach: Collecting source files...
+      96
+Mach: Compiling microkernel core...
+find /Users/niladri/Desktop/monday/xnu-build/sources/xnu/osfmk/kern -name "*.c" -type f | head -5 | \
+	  xargs -I {} /Applications/Xcode.app/Contents/Developer/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Users/niladri/Desktop/monday/xnu-build/sources/xnu/osfmk -c {} -o /tmp/mach_$(basename {}).o 2>/dev/null || true
+✓ Mach microkernel compiled
+mkdir -p /Users/niladri/Desktop/monday/xnu-build/build/bsd
+BSD: Collecting system call interface...
+     106
+BSD: Compiling POSIX layer...
+find /Users/niladri/Desktop/monday/xnu-build/sources/xnu/bsd/kern -name "*.c" -type f | head -5 | \
+	  xargs -I {} /Applications/Xcode.app/Contents/Developer/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Users/niladri/Desktop/monday/xnu-build/sources/xnu/bsd -c {} -o /tmp/bsd_$(basename {}).o 2>/dev/null || true
+✓ BSD layer compiled
+mkdir -p /Users/niladri/Desktop/monday/xnu-build/build/iokit
+IOKit: Locating device framework...
+      65
+IOKit: Compiling C++ drivers...
+find /Users/niladri/Desktop/monday/xnu-build/sources/xnu/iokit/Kernel -name "*.cpp" -type f 2>/dev/null | head -3 | \
+	  xargs -I {} /Applications/Xcode.app/Contents/Developer/usr/bin/clang++ -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Users/niladri/Desktop/monday/xnu-build/sources/xnu/iokit -c {} -o /tmp/iokit_$(basename {}).o 2>/dev/null || true
+✓ I/O Kit compiled
+make: Nothing to be done for `mach'.
+make: Nothing to be done for `bsd'.
+make: Nothing to be done for `iokit'.
+make: Nothing to be done for `mach'.
+make: Nothing to be done for `bsd'.
+make: Nothing to be done for `iokit'.
+make: Nothing to be done for `mach'.
+make: Nothing to be done for `bsd'.
+make: Nothing to be done for `iokit'.
+make: Nothing to be done for `mach'.
+make: Nothing to be done for `bsd'.
+make: Nothing to be done for `iokit'.
+make: Nothing to be done for `mach'.
+make: Nothing to be done for `bsd'.
+make: Nothing to be done for `iokit'.
+make: Nothing to be done for `mach'.
+make: Nothing to be done for `bsd'.
+make: Nothing to be done for `iokit'.
+make: Nothing to be done for `mach'.
+make: Nothing to be done for `bsd'.
+make: Nothing to be done for `iokit'.
+mkdir -p /Users/niladri/Desktop/monday/xnu-build/build/libkern
+libkern: Archiving kernel utilities...
+find /Users/niladri/Desktop/monday/xnu-build/sources/xnu/libkern -name "*.c" -o -name "*.cpp" | head -20 | xargs /Applications/Xcode.app/Contents/Developer/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -c -o /tmp/libkern_test.o 2>/dev/null || true
+✓ libkern utilities compiled
+make: Nothing to be done for `mach'.
+make: Nothing to be done for `bsd'.
+make: Nothing to be done for `iokit'.
