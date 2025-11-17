@@ -47,3 +47,9 @@ find /Users/niladri/Desktop/monday/xnu-build/sources/xnu/libkern -name "*.c" -o 
 make: Nothing to be done for `mach'.
 make: Nothing to be done for `bsd'.
 make: Nothing to be done for `iokit'.
+libkern: Archiving kernel utilities...
+find /Users/niladri/Desktop/monday/sources/xnu/libkern -name "*.c" -o -name "*.cpp" | head -20 | xargs /Applications/Xcode.app/Contents/Developer/usr/bin/clang -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -c -o /tmp/libkern_test.o 2>/dev/null || true
+✓ libkern utilities compiled
+make: Nothing to be done for `mach'.
+make: Nothing to be done for `bsd'.
+make: Nothing to be done for `iokit'.
