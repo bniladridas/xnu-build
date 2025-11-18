@@ -6,6 +6,39 @@
 
 set -e
 
+# Parse command line arguments
+JOBS=""
+MINIMAL=false
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h|--help)
+      echo "Usage: $0 [options]"
+      echo ""
+      echo "Options:"
+      echo "  -h, --help          Show this help message"
+      echo "  -j <jobs>           Number of parallel jobs"
+      echo "  --minimal           Build only essential tools"
+      echo ""
+      echo "Builds userland tools and utilities."
+      exit 0
+      ;;
+    -j)
+      JOBS="$2"
+      shift 2
+      ;;
+    --minimal)
+      MINIMAL=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Use -h or --help for usage information."
+      exit 1
+      ;;
+  esac
+done
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 CONFIG_FILE="$PROJECT_ROOT/BUILD_CONFIG.env"

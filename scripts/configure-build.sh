@@ -6,6 +6,45 @@
 
 set -e
 
+# Parse command line arguments
+CUSTOM_SDK=""
+CUSTOM_CC=""
+CUSTOM_CXX=""
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h|--help)
+      echo "Usage: $0 [options]"
+      echo ""
+      echo "Options:"
+      echo "  -h, --help          Show this help message"
+      echo "  --sdk <path>        Path to macOS SDK"
+      echo "  --cc <compiler>     C compiler to use"
+      echo "  --cxx <compiler>    C++ compiler to use"
+      echo ""
+      echo "Configures the build environment and generates Makefiles."
+      exit 0
+      ;;
+    --sdk)
+      CUSTOM_SDK="$2"
+      shift 2
+      ;;
+    --cc)
+      CUSTOM_CC="$2"
+      shift 2
+      ;;
+    --cxx)
+      CUSTOM_CXX="$2"
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Use -h or --help for usage information."
+      exit 1
+      ;;
+  esac
+done
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 CONFIG_FILE="$PROJECT_ROOT/BUILD_CONFIG.env"
@@ -18,6 +57,17 @@ if [[ ! -f "$CONFIG_FILE" ]]; then
     exit 1
 fi
 source "$CONFIG_FILE"
+
+# Override with custom options
+if [[ -n "$CUSTOM_SDK" ]]; then
+    SDK_PATH="$CUSTOM_SDK"
+fi
+if [[ -n "$CUSTOM_CC" ]]; then
+    CC="$CUSTOM_CC"
+fi
+if [[ -n "$CUSTOM_CXX" ]]; then
+    CXX="$CUSTOM_CXX"
+fi
 
 # Color output
 RED='\033[0;31m'

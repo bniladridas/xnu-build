@@ -6,6 +6,51 @@
 
 set -e
 
+# Parse command line arguments
+CLEAN_BUILD=false
+VERBOSE=false
+TARGET_ARCH=""
+SKIP_TOOLS=false
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h|--help)
+      echo "Usage: $0 [options]"
+      echo ""
+      echo "Options:"
+      echo "  -h, --help          Show this help message"
+      echo "  -c, --clean         Clean build artifacts before building"
+      echo "  -v, --verbose       Enable verbose output"
+      echo "  --arch <arch>       Target architecture (arm64, x86_64)"
+      echo "  --no-tools          Skip building userland tools"
+      echo ""
+      echo "Complete automated build script that handles the entire process."
+      exit 0
+      ;;
+    -c|--clean)
+      CLEAN_BUILD=true
+      shift
+      ;;
+    -v|--verbose)
+      VERBOSE=true
+      shift
+      ;;
+    --arch)
+      TARGET_ARCH="$2"
+      shift 2
+      ;;
+    --no-tools)
+      SKIP_TOOLS=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Use -h or --help for usage information."
+      exit 1
+      ;;
+  esac
+done
+
 # Get absolute paths for zsh
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
@@ -28,6 +73,13 @@ echo "║      Darwin/XNU Complete Build - All Stages               ║"
 echo "║                                                            ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo -e "${NC}\n"
+
+# Clean build if requested
+if [[ "$CLEAN_BUILD" == true ]]; then
+  echo -e "${BLUE}═══ Cleaning Previous Build ═══${NC}\n"
+  rm -rf "$PROJECT_ROOT/build" "$PROJECT_ROOT/output"
+  echo -e "${GREEN}✓${NC} Build artifacts cleaned\n"
+fi
 
 # Stage 1: Environment Detection
 echo -e "${BLUE}═══ STAGE 1: Environment Detection ═══${NC}\n"
@@ -67,11 +119,16 @@ if [[ $? -ne 0 ]]; then
 fi
 
 # Stage 5: Build Tools (Optional)
-echo -e "\n${BLUE}═══ STAGE 5: Building Userland Tools ═══${NC}\n"
-"$SCRIPT_DIR/build-tools.sh"
+if [[ "$SKIP_TOOLS" != true ]]; then
+  echo -e "\n${BLUE}═══ STAGE 5: Building Userland Tools ═══${NC}\n"
+  "$SCRIPT_DIR/build-tools.sh"
 
-if [[ $? -ne 0 ]]; then
-    echo -e "${YELLOW}⚠ Tools build completed with warnings${NC}"
+  if [[ $? -ne 0 ]]; then
+      echo -e "${YELLOW}⚠ Tools build completed with warnings${NC}"
+  fi
+else
+  echo -e "\n${BLUE}═══ STAGE 5: Skipping Userland Tools ═══${NC}\n"
+  echo -e "${YELLOW}⚠${NC} Tools build skipped as requested"
 fi
 
 # Completion

@@ -1,0 +1,11 @@
+# Build artifacts
+build/
+output/
+BUILD_CONFIG.env
+
+# macOS
+.DS_Store
+
+# Temporary files
+*.tmp
+*.log

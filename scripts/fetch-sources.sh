@@ -5,6 +5,33 @@
 
 set -e
 
+# Parse command line arguments
+FORCE_FETCH=false
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h|--help)
+      echo "Usage: $0 [options]"
+      echo ""
+      echo "Options:"
+      echo "  -h, --help          Show this help message"
+      echo "  -f, --force         Force re-fetch even if sources exist"
+      echo ""
+      echo "Fetches XNU and related sources from Apple repositories."
+      exit 0
+      ;;
+    -f|--force)
+      FORCE_FETCH=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Use -h or --help for usage information."
+      exit 1
+      ;;
+  esac
+done
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 SOURCES_DIR="$PROJECT_ROOT/sources"
@@ -54,10 +81,14 @@ get_repo_url() {
 for repo_name in $REPO_LIST; do
     repo_url=$(get_repo_url "$repo_name")
     target_dir="$SOURCES_DIR/$repo_name"
-    
-    if [ -d "$target_dir" ]; then
+
+    if [ -d "$target_dir" ] && [ "$FORCE_FETCH" != true ]; then
         echo -e "${YELLOW}⚠${NC}  $repo_name already exists, skipping..."
     else
+        if [ -d "$target_dir" ] && [ "$FORCE_FETCH" == true ]; then
+            echo -e "${YELLOW}⚠${NC}  $repo_name exists, force re-fetching..."
+            rm -rf "$target_dir"
+        fi
         echo -e "${BLUE}→${NC}  Cloning $repo_name..."
         echo "    URL: $repo_url"
         
@@ -76,10 +107,14 @@ echo -e "\n${BLUE}Cloning supplementary components...${NC}\n"
 for repo_name in $ALT_REPO_LIST; do
     repo_url=$(get_repo_url "$repo_name")
     target_dir="$SOURCES_DIR/$repo_name"
-    
-    if [ -d "$target_dir" ]; then
+
+    if [ -d "$target_dir" ] && [ "$FORCE_FETCH" != true ]; then
         echo -e "${YELLOW}⚠${NC}  $repo_name already exists, skipping..."
     else
+        if [ -d "$target_dir" ] && [ "$FORCE_FETCH" == true ]; then
+            echo -e "${YELLOW}⚠${NC}  $repo_name exists, force re-fetching..."
+            rm -rf "$target_dir"
+        fi
         echo -e "${BLUE}→${NC}  Attempting to clone $repo_name..."
         
         if git clone --depth 1 "$repo_url" "$target_dir" 2>/dev/null; then

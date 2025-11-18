@@ -1,4 +1,4 @@
-# XNU Kernel Build System
+# XNU Build
 
 [![Build Status](https://github.com/bniladridas/xnu-build/actions/workflows/build.yml/badge.svg)](https://github.com/bniladridas/xnu-build/actions/workflows/build.yml)
 
@@ -11,15 +11,6 @@ A comprehensive build system for compiling Apple's XNU kernel on macOS, featurin
 2. **Authorized Use Only**: Intended for learning Darwin kernel architecture, VM testing, development, and research purposes only.
 
 3. **Never Attempt On Production Systems**: Do not boot or test on real hardware or production systems.
-
-## Build System Features
-
-- **Automated Environment Detection**: Detects macOS version, Xcode tools, and system capabilities
-- **Source Management**: Fetches and manages XNU, libkern, and related sources
-- **Build Configuration**: Generates optimized build configurations for different architectures
-- **Kernel Compilation**: Compiles Mach, BSD, and I/O Kit components with error fixes
-- **Artifact Generation**: Produces kernel binaries, debug symbols, and compressed caches
-- **VM Testing Support**: Ready for QEMU-based virtual machine testing
 
 ## Requirements
 
@@ -50,35 +41,114 @@ A comprehensive build system for compiling Apple's XNU kernel on macOS, featurin
 
 ## Usage
 
-### Complete Automated Build
+Build the complete XNU kernel:
+
 ```bash
+# Automated build
 ./scripts/build-all.sh
+
+# Or step-by-step
+./scripts/fetch-sources.sh
+./scripts/configure-build.sh
+./scripts/build-kernel.sh
+./scripts/build-tools.sh
 ```
 
-### Step-by-Step Build
-1. Fetch sources:
-   ```bash
-   ./scripts/fetch-sources.sh
-   ```
+Custom build with specific options:
 
-2. Configure build environment:
-   ```bash
-   ./scripts/configure-build.sh
-   ```
-
-3. Build kernel:
-   ```bash
-   ./scripts/build-kernel.sh
-   ```
-
-4. Build userland tools (optional):
-   ```bash
-   ./scripts/build-tools.sh
-   ```
-
-### Custom Build Script
 ```bash
-./build_xnu.sh
+# Build for specific architecture
+./build_xnu.sh --arch arm64
+
+# Clean build
+./build_xnu.sh --clean
+
+# Verbose output
+./build_xnu.sh --verbose
+```
+
+## Command Line Interface
+
+### `./scripts/build-all.sh`
+
+Complete automated build script that handles the entire process.
+
+```
+Usage: ./scripts/build-all.sh [options]
+
+Options:
+  -h, --help          Show this help message
+  -c, --clean         Clean build artifacts before building
+  -v, --verbose       Enable verbose output
+  --arch <arch>       Target architecture (arm64, x86_64)
+  --no-tools          Skip building userland tools
+```
+
+### `./scripts/fetch-sources.sh`
+
+Fetches XNU and related sources from Apple repositories.
+
+```
+Usage: ./scripts/fetch-sources.sh [options]
+
+Options:
+  -h, --help          Show this help message
+  -f, --force         Force re-fetch even if sources exist
+```
+
+### `./scripts/configure-build.sh`
+
+Configures the build environment and generates Makefiles.
+
+```
+Usage: ./scripts/configure-build.sh [options]
+
+Options:
+  -h, --help          Show this help message
+  --sdk <path>        Path to macOS SDK
+  --cc <compiler>     C compiler to use
+  --cxx <compiler>    C++ compiler to use
+```
+
+### `./scripts/build-kernel.sh`
+
+Compiles the XNU kernel components.
+
+```
+Usage: ./scripts/build-kernel.sh [options]
+
+Options:
+  -h, --help          Show this help message
+  -j <jobs>           Number of parallel jobs
+  --debug             Build with debug symbols
+  --release           Build optimized release version
+```
+
+### `./scripts/build-tools.sh`
+
+Builds userland tools and utilities.
+
+```
+Usage: ./scripts/build-tools.sh [options]
+
+Options:
+  -h, --help          Show this help message
+  -j <jobs>           Number of parallel jobs
+  --minimal           Build only essential tools
+```
+
+### `./build_xnu.sh`
+
+Custom build script with advanced options.
+
+```
+Usage: ./build_xnu.sh [options]
+
+Options:
+  -h, --help          Show this help message
+  -c, --clean         Clean build directory
+  -v, --verbose       Verbose output
+  --arch <arch>       Target architecture
 ```
 
 ## Build Components
@@ -98,12 +168,120 @@ A comprehensive build system for compiling Apple's XNU kernel on macOS, featurin
 
 ## Build Phases
 
-1. **Environment Detection**: Verifies system capabilities and generates configuration
-2. **Source Preparation**: Clones official Apple Open Source repositories
-3. **Build Configuration**: Sets up build environment with proper flags and paths
-4. **Kernel Compilation**: Compiles Mach, BSD, and I/O Kit components
-5. **Linking**: Combines object files and generates final kernel binary
-6. **Artifact Generation**: Creates kernelcache and debug symbols
+### `detect-env.sh` - Environment Detection
+
+Verifies system capabilities and generates build configuration.
+
+**Inputs:**
+- macOS version
+- Xcode Command Line Tools
+- Available compilers
+
+**Outputs:**
+- `BUILD_CONFIG.env` with detected settings
+- Validation of build requirements
+
+### `fetch-sources.sh` - Source Preparation
+
+Clones official Apple Open Source repositories.
+
+**Inputs:**
+- Repository URLs
+- Branch/tag specifications
+
+**Outputs:**
+- Local clones of XNU, libkern, etc.
+- Source directories in expected locations
+
+### `configure-build.sh` - Build Configuration
+
+Sets up build environment with proper flags and paths.
+
+**Inputs:**
+- SDK paths
+- Compiler settings
+- Architecture targets
+
+**Outputs:**
+- Generated Makefiles
+- Build configuration files
+- `build/build-info.sh` with build details
+
+### `build-kernel.sh` - Kernel Compilation
+
+Compiles Mach, BSD, and I/O Kit components.
+
+**Inputs:**
+- Source files
+- Build configuration
+- Compiler flags
+
+**Outputs:**
+- Object files in `build/`
+- Compiled kernel components
+
+### `build-tools.sh` - Userland Tools
+
+Builds userland tools and utilities.
+
+**Inputs:**
+- Tool source code
+- Build configuration
+
+**Outputs:**
+- Executable tools
+- Libraries for userland
+
+### `build-all.sh` - Complete Build
+
+Orchestrates the entire build process.
+
+**Inputs:**
+- All build options
+- Source repositories
+
+**Outputs:**
+- Complete kernel binary
+- Debug symbols
+- Compressed kernelcache
+
+## XNU Kernel Primer
+
+XNU is Apple's open-source kernel that powers macOS, iOS, and other Darwin-based systems. It combines three major components:
+
+### Mach Microkernel
+
+The foundation layer providing:
+- **Memory Management**: Virtual memory, paging, and protection
+- **IPC (Inter-Process Communication)**: Message passing between tasks
+- **Scheduling**: Thread and task scheduling
+- **Low-level Services**: Timers, interrupts, and device drivers
+
+### BSD Layer
+
+Provides POSIX compatibility:
+- **System Calls**: Interface between user space and kernel
+- **Process Management**: fork, exec, process lifecycle
+- **File Systems**: HFS+, APFS, and network file systems
+- **Networking**: TCP/IP stack and socket interfaces
+- **Security**: User permissions and access control
+
+### I/O Kit
+
+Device driver framework:
+- **Driver Matching**: Automatic driver loading for hardware
+- **Power Management**: Device power states and transitions
+- **Hot Plugging**: Dynamic device attachment/removal
+- **User-Space Drivers**: Support for complex device drivers
+
+### Build Process
+
+The build system compiles these components into a unified kernel binary:
+
+1. **Source Integration**: Combines Mach, BSD, and I/O Kit sources
+2. **Cross-Compilation**: Uses macOS SDK for kernel compilation
+3. **Linking**: Creates Mach-O executable with proper load commands
+4. **Compression**: Generates kernelcache for efficient loading
 
 ## Build Output
 
@@ -141,7 +319,52 @@ xnu-build/
 - Kernel build log: `build/build.log`
 - Configuration details: `build/build-info.sh`
 
+## Comparisons to Other XNU Build Methods
+
+While there are several ways to build XNU, this build system provides specific advantages:
+
+### Manual Build Scripts
+
+Traditional approach using Apple's documentation:
+- **Pros**: Direct control, follows official methods
+- **Cons**: Error-prone, requires deep knowledge, no automation
+
+This system automates the manual process while maintaining compatibility.
+
+### Xcode Projects
+
+Using Xcode for kernel development:
+- **Pros**: Integrated IDE, debugging support
+- **Cons**: Limited to userland, complex setup for kernel
+
+This system focuses on command-line kernel builds for CI/CD and automation.
+
+### Third-Party Tools
+
+Other build tools and scripts:
+- **Pros**: May have additional features
+- **Cons**: Often outdated, not maintained, security concerns
+
+This system stays current with Apple's latest sources and security practices.
+
 ## Contributing
+
+Any change to build scripts or behavior must come with tests and documentation.
+
+Patches that break builds or reduce reliability will be rejected.
+
+```sh
+# to run builds
+./scripts/build-all.sh
+
+# to test changes
+./scripts/build-kernel.sh --debug
+
+# to check environment
+./scripts/detect-env.sh
+```
+
+### Development Workflow
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/new-feature`

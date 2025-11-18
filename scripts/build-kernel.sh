@@ -6,6 +6,44 @@
 
 set -e
 
+# Parse command line arguments
+JOBS=""
+CONFIGURATION="Debug"
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h|--help)
+      echo "Usage: $0 [options]"
+      echo ""
+      echo "Options:"
+      echo "  -h, --help          Show this help message"
+      echo "  -j <jobs>           Number of parallel jobs"
+      echo "  --debug             Build with debug symbols"
+      echo "  --release           Build optimized release version"
+      echo ""
+      echo "Compiles the XNU kernel components."
+      exit 0
+      ;;
+    -j)
+      JOBS="$2"
+      shift 2
+      ;;
+    --debug)
+      CONFIGURATION="Debug"
+      shift
+      ;;
+    --release)
+      CONFIGURATION="Release"
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Use -h or --help for usage information."
+      exit 1
+      ;;
+  esac
+done
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 CONFIG_FILE="$PROJECT_ROOT/BUILD_CONFIG.env"
@@ -30,7 +68,6 @@ NC='\033[0m'
 
 # Configuration
 VERBOSE=${VERBOSE:-1}
-CONFIGURATION=${CONFIGURATION:-Debug}
 BUILD_LOG="$BUILD_DIR/build.log"
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
