@@ -3,6 +3,9 @@ build/
 output/
 BUILD_CONFIG.env
 
+# Source repositories (fetched dynamically)
+sources/
+
 # macOS
 .DS_Store
 
