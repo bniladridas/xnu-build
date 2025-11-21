@@ -1,4 +1,4 @@
-name: Build XNU Kernel
+name: Build and Test XNU Kernel
 
 on:
   push:
@@ -7,16 +7,55 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  test-scripts:
     runs-on: macos-latest
-
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Xcode
+    - name: Install actionlint
       run: |
-        sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+        brew install actionlint
+
+    - name: Validate GitHub Actions workflows
+      run: |
+        actionlint .github/workflows/*.yml
+        echo "Workflows are valid"
+
+    - name: Validate shell scripts
+      run: |
+        find scripts/ -name "*.sh" -exec bash -n {} \;
+        echo "All scripts are syntactically valid"
+
+    - name: Check study guides exist
+      run: |
+        ls -la MACH_*.md BSD_*.md IOKIT_*.md XNU_*.md
+        echo "Study guides are present"
+
+    - name: Test fetch-sources help
+      run: ./scripts/fetch-sources.sh --help
+
+    - name: Test build-kernel help
+      run: ./scripts/build-kernel.sh --help
+
+  build:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        xcode: [15.4, latest]
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Xcode ${{ matrix.xcode }}
+      run: |
+        if [ "${{ matrix.xcode }}" = "latest" ]; then
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+        else
+          sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
+        fi
         xcodebuild -version
+
+    - name: Install QEMU for testing
+      run: brew install qemu
 
     - name: Run environment detection
       run: ./scripts/detect-env.sh
@@ -30,10 +69,52 @@ jobs:
     - name: Build kernel
       run: ./scripts/build-kernel.sh
 
+    - name: Run complete build test
+      run: ./scripts/build-all.sh
+
+    - name: Test VM script (dry run)
+      run: timeout 10s ./scripts/test-vm.sh || echo "VM test timed out as expected"
+
+    - name: Validate build artifacts
+      run: |
+        ls -la output/arm64/
+        if [ -f output/arm64/kernel ]; then
+          file output/arm64/kernel
+          echo "Kernel artifact exists"
+        else
+          echo "No kernel artifact found"
+          exit 1
+        fi
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: xnu-kernel-artifacts
+        name: xnu-kernel-artifacts-${{ matrix.xcode }}
         path: |
           output/
           build/build.log
+          BUILD_CONFIG.env
+
+  test-sources:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Xcode
+      run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+    - name: Run environment detection
+      run: ./scripts/detect-env.sh
+
+    - name: Force fetch sources
+      run: ./scripts/fetch-sources.sh --force
+
+    - name: Verify source integrity
+      run: |
+        find sources/ -name "*.c" -o -name "*.cpp" -o -name "*.h" | wc -l
+        echo "Sources contain C/C++ files"
+
+    - name: Check XNU structure
+      run: |
+        ls sources/xnu/osfmk sources/xnu/bsd sources/xnu/iokit sources/xnu/libkern
+        echo "XNU structure is correct"

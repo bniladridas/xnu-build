@@ -226,29 +226,32 @@ echo -e "${GREEN}✓${NC} I/O Kit compiled"
 
 echo -e "\n${BLUE}[Phase 6/6]${NC} Linking Kernel and Generating Outputs\n"
 
-# Create final kernel artifacts (simulated for this example)
-for arch in $TARGET_ARCHS; do
+# Build real kernel using XNU make system
+cd "$SOURCES_DIR/xnu"
+
+echo "Building kernel with XNU make system..."
+make SDKROOT=macosx26.1 ARCH_CONFIGS=ARM64 KERNEL_CONFIGS=DEVELOPMENT >> "$BUILD_LOG" 2>&1
+
+# Copy built kernel to output directory
+for arch in arm64; do
     mkdir -p "$OUTPUT_DIR/$arch"
-    
-    echo "Linking kernel for $arch architecture..."
-    
-    # Create mock kernel binary
-    echo "Mock XNU Kernel Binary" > "$OUTPUT_DIR/$arch/kernel"
-    chmod +x "$OUTPUT_DIR/$arch/kernel"
-    
-    # Create mock kernelcache
-    gzip < "$OUTPUT_DIR/$arch/kernel" > "$OUTPUT_DIR/$arch/kernelcache" 2>/dev/null || true
-    
-    echo -e "${GREEN}✓${NC} $arch kernel linked"
-    
-    # Simulate symbol generation
-    cat > "$OUTPUT_DIR/$arch/kernel.dSYM" << EOF
-Kernel Debug Symbols
-Arch: $arch
-Build: $(date)
-EOF
-    
-    echo -e "${GREEN}✓${NC} Debug symbols generated"
+
+    if [[ -f "BUILD/obj/DEVELOPMENT/ARM64/kernel.development" ]]; then
+        cp "BUILD/obj/DEVELOPMENT/ARM64/kernel.development" "$OUTPUT_DIR/$arch/kernel"
+        cp "BUILD/obj/DEVELOPMENT/ARM64/kernel.development.unstripped" "$OUTPUT_DIR/$arch/kernel.unstripped" 2>/dev/null || true
+        cp -r "BUILD/obj/DEVELOPMENT/ARM64/kernel.development.dSYM" "$OUTPUT_DIR/$arch/" 2>/dev/null || true
+
+        # Create kernelcache
+        if command -v gzip &> /dev/null; then
+            gzip < "$OUTPUT_DIR/$arch/kernel" > "$OUTPUT_DIR/$arch/kernelcache" 2>/dev/null || true
+        fi
+
+        echo -e "${GREEN}✓${NC} $arch kernel linked"
+        echo -e "${GREEN}✓${NC} Debug symbols generated"
+    else
+        echo -e "${RED}✗${NC} Kernel build failed - check build log"
+        exit 1
+    fi
 done
 
 # Generate build manifest

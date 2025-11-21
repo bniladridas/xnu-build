@@ -58,7 +58,7 @@ mkdir -p "$SOURCES_DIR"
 
 # Define repositories - XNU is the primary source (contains libkern, libc, BSD, I/O Kit)
 REPO_LIST="xnu"
-REPO_URL_XNU="https://github.com/apple/darwin-xnu.git"
+REPO_URL_XNU="https://github.com/bniladridas/darwin-xnu.git"
 
 # Alternative sources
 ALT_REPO_LIST="dyld cctools"
@@ -66,7 +66,8 @@ ALT_REPO_URL_DYLD="https://github.com/apple/dyld.git"
 ALT_REPO_URL_CCTOOLS="https://github.com/tpoechtrager/cctools-port.git"
 
 echo -e "${BLUE}Cloning core components from Apple Open Source...${NC}\n"
-echo -e "${YELLOW}Note:${NC} XNU includes libkern, libc, BSD, and I/O Kit within its source tree\n"
+echo -e "${YELLOW}Note:${NC} XNU includes libkern, libc, BSD, and I/O Kit within its source tree"
+echo -e "${YELLOW}Note:${NC} Using fixed XNU fork (fix-clang17-errors branch) for Clang 17 compatibility\n"
 
 # Function to get repo URL
 get_repo_url() {
@@ -91,8 +92,13 @@ for repo_name in $REPO_LIST; do
         fi
         echo -e "${BLUE}→${NC}  Cloning $repo_name..."
         echo "    URL: $repo_url"
-        
-        if git clone --depth 1 "$repo_url" "$target_dir" 2>/dev/null; then
+
+        if [ "$repo_name" = "xnu" ]; then
+            git clone --depth 1 --branch fix-clang17-errors "$repo_url" "$target_dir" 2>/dev/null
+        else
+            git clone --depth 1 "$repo_url" "$target_dir" 2>/dev/null
+        fi
+        if [ $? -eq 0 ]; then
             echo -e "${GREEN}✓${NC}  $repo_name cloned successfully"
         else
             echo -e "${RED}✗${NC}  FAILED to clone $repo_name"
