@@ -6,25 +6,81 @@ A comprehensive build system for compiling Apple's XNU kernel on macOS, featurin
 
 ## ⚠️ Critical Disclaimers
 
-1. **System Kernel Replacement NOT POSSIBLE**: Modern macOS uses System Integrity Protection (SIP) and kernel code signing that prevent replacing the system kernel. This is for **educational and VM testing only**.
+### System Kernel Replacement Not Possible
 
-2. **Authorized Use Only**: Intended for learning Darwin kernel architecture, VM testing, development, and research purposes only.
+Modern macOS uses System Integrity Protection (SIP) and kernel code signing that prevent replacing the system kernel. Attempting to boot custom kernels on production systems can cause system instability or permanent damage.
 
-3. **Never Attempt On Production Systems**: Do not boot or test on real hardware or production systems.
+**Recommendation**
+
+Use this build system for educational and virtual machine testing only. Never attempt kernel replacement on real hardware.
+
+**Example**
+
+In this code, attempting to load a custom kernel on a production system:
+
+```bash
+# DANGEROUS - Do not run on real hardware
+sudo kextload /path/to/custom/kernel.kext
+```
+
+This can cause system crashes, data loss, or require complete OS reinstallation. Instead, use virtual machines:
+
+```bash
+# SAFE - Test in QEMU virtual machine
+./scripts/test-vm.sh
+```
+
+**References**
+
+- Apple Developer: System Integrity Protection Guide
+- Apple Security: Kernel Code Signing
+- macOS Security Overview
 
 ## Requirements
 
+### Missing Build Dependencies
+
+Building XNU requires specific tools and versions. Using incompatible or missing dependencies can result in compilation failures or incorrect kernel binaries.
+
+**Recommendation**
+
+Ensure all required dependencies are installed and at compatible versions before building.
+
+**Example**
+
+In this build attempt, missing Xcode Command Line Tools causes failure:
+
+```bash
+$ ./scripts/build-all.sh
+ERROR: Xcode Command Line Tools not found
+```
+
+Install the required tools:
+
+```bash
+# Install Xcode Command Line Tools
+xcode-select --install
+
+# Verify installation
+xcodebuild -version
+```
+
+**Required Dependencies**
 - **macOS**: 11.0+ (Big Sur or later)
 - **Xcode Command Line Tools**: Latest version
 - **Git**: For source management
 - **Python 3**: For build scripts
-- **CMake**: Optional, for advanced configurations
 
-### Optional for VM Testing
-
+**Optional for VM Testing**
 - **QEMU**: 6.0+ (for kernel testing)
 - **UTM**: For native Apple Silicon support
 - **VirtualBox**: For traditional x86_64 testing
+
+**References**
+
+- Apple Developer: Xcode Command Line Tools
+- Homebrew: macOS Package Manager
+- Git Documentation: Installation Guide
 
 ## Installation
 
@@ -291,7 +347,36 @@ The build system compiles these components into a unified kernel binary:
 
 ## Testing
 
-Built kernels are designed for virtual machine testing only. See documentation for QEMU setup.
+### Unsafe Kernel Testing Practices
+
+Testing custom kernels on production systems or real hardware can cause system crashes, data corruption, or permanent damage due to kernel panics or incompatible drivers.
+
+**Recommendation**
+
+Always test kernels in virtual machines with proper isolation. Use QEMU or UTM for safe kernel experimentation.
+
+**Example**
+
+Dangerous testing on real hardware:
+
+```bash
+# DANGEROUS - Can crash system permanently
+sudo reboot  # After installing custom kernel
+```
+
+Safe testing in virtual machine:
+
+```bash
+# SAFE - Isolated testing environment
+./scripts/test-vm.sh
+qemu-system-aarch64 -M virt -kernel output/arm64/kernel -nographic
+```
+
+**References**
+
+- QEMU Documentation: Virtual Machine Setup
+- UTM: Apple Silicon Virtualization
+- Apple Developer: Kernel Debugging Guide
 
 ## Project Structure
 
