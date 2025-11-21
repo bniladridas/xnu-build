@@ -3,6 +3,7 @@ name: Build and Test XNU Kernel
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main ]
 
@@ -117,3 +118,61 @@ jobs:
       run: |
         ls sources/xnu/osfmk sources/xnu/bsd sources/xnu/iokit sources/xnu/libkern
         echo "XNU structure is correct"
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Create Release Archive
+      run: |
+        tar -czf xnu-build-${{ github.ref_name }}.tar.gz \
+          --exclude='.git' \
+          --exclude='sources' \
+          --exclude='build' \
+          --exclude='output' \
+          --exclude='BUILD_CONFIG.env' \
+          .
+
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: Release ${{ github.ref_name }}
+        body: |
+          ## XNU Build System ${{ github.ref_name }}
+
+          Automated release of the XNU kernel build system.
+
+          ### What's Included
+          - Complete build scripts and automation
+          - Study guides and documentation
+          - CI/CD configuration
+          - VM testing tools
+
+          ### Installation
+          ```bash
+          git clone https://github.com/bniladridas/xnu-build.git
+          cd xnu-build
+          ./scripts/build-all.sh
+          ```
+
+          ### Notes
+          - Educational and VM testing only
+          - Requires macOS for full functionality
+          - See README.md for detailed usage
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./xnu-build-${{ github.ref_name }}.tar.gz
+        asset_name: xnu-build-${{ github.ref_name }}.tar.gz
+        asset_content_type: application/gzip
