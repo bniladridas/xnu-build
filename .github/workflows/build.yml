@@ -41,17 +41,16 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        xcode: [15.4, latest]
+        xcode: [latest]
+        include:
+          - xcode: latest
+            path: /Applications/Xcode.app/Contents/Developer
     steps:
     - uses: actions/checkout@v4
 
     - name: Set up Xcode ${{ matrix.xcode }}
       run: |
-        if [ "${{ matrix.xcode }}" = "latest" ]; then
-          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-        else
-          sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
-        fi
+        sudo xcode-select -s ${{ matrix.path }}
         xcodebuild -version
 
     - name: Install QEMU for testing
