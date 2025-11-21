@@ -44,7 +44,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-XNU_DIR="/Users/niladri/Desktop/monday/xnu-build/sources/xnu"
+XNU_DIR="/Users/niladri/Desktop/xnu-build/sources/xnu"
 MAKEDEFS_URL="https://github.com/apple/darwin-xnu-makedefs"
 
 echo "Setting up XNU build environment..."
